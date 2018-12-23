@@ -9,6 +9,8 @@ import (
 	"github.com/sahib/wedlist/db"
 )
 
+type userKey string
+
 type AuthHandler interface {
 	NeedsAuthentication() bool
 }
@@ -73,7 +75,7 @@ func (amw *AuthMiddleware) Middleware(next http.Handler) http.Handler {
 				return
 			}
 
-			r = r.WithContext(context.WithValue(r.Context(), "user", user))
+			r = r.WithContext(context.WithValue(r.Context(), userKey("user"), user))
 		}
 
 		next.ServeHTTP(w, r)

@@ -32,16 +32,28 @@ $(document).ready(function(){
 
 		errorBox.hide()
 
-        $.ajax("/api/v0/login", {
-            data : JSON.stringify({
+        $.ajax({
+            url: "/api/v0/login",
+            dataType: "json",
+            type: 'POST',
+            contentType: 'application/json',
+            processData: false,
+            data: JSON.stringify({
                 "name": name,
                 "email": email,
             }),
-            contentType : 'application/json',
-            type : 'POST',
+            success: function(data, textStatus, jQxhr) {
+                afterSubmitAlert.show()
+                console.log("DATA " + data, data.Success, data.IsAlreadyLoggedIn)
+                if(data.IsAlreadyLoggedIn) {
+                    afterSubmitAlert.text('Bereits eingeloggt. Leite weiter.');
+				    window.location.replace("/list.html")
+                } else {
+                    afterSubmitAlert.text(
+                        'Es wurde eine E-Mail an "' + email + '" geschickt. Bitte klicke auf den darin enthaltenen Link.'
+                    );
+                }
+            },
         });
-
-		afterSubmitAlert.text('Es wurde eine E-Mail an "' + email + '" geschickt. Bitte klicke auf den darin enthaltenen Link.')
-		afterSubmitAlert.show()
     });
 });

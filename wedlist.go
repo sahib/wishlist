@@ -7,11 +7,11 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/sahib/config"
 	"github.com/sahib/wedlist/cache"
 	"github.com/sahib/wedlist/db"
 	"github.com/sahib/wedlist/defaults"
 	"github.com/sahib/wedlist/server"
-	"github.com/sahib/config"
 )
 
 func main() {
@@ -29,13 +29,12 @@ func main() {
 		}
 
 		log.Printf("creating empty config at %s", configPath)
-		// ioutil.WriteFile(configPath, nil, 0644)
 		cfg, err = config.Open(nil, defaults.Defaults, config.StrictnessPanic)
 		if err != nil {
 			log.Fatalf("failed to load defaults: %v", err)
 		}
 
-		fd, err := os.OpenFile(configPath, os.O_CREATE|os.O_WRONLY, 0644)
+		fd, err := os.OpenFile(configPath, os.O_CREATE|os.O_WRONLY, 0600)
 		if err != nil {
 			log.Fatalf("failed to open config location: %v", err)
 		}

@@ -26,7 +26,7 @@ func NewListHandler(db *db.Database) *ListHandler {
 }
 
 func (lh *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	user, ok := r.Context().Value("user").(*db.User)
+	user, ok := r.Context().Value(userKey("user")).(*db.User)
 	if !ok {
 		jsonifyErrf(w, http.StatusInternalServerError, "failed to read user")
 		return

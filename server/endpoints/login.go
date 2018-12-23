@@ -14,9 +14,9 @@ import (
 	"text/template"
 
 	"github.com/gofrs/uuid"
+	"github.com/sahib/config"
 	"github.com/sahib/wedlist/cache"
 	"github.com/sahib/wedlist/db"
-	"github.com/sahib/config"
 )
 
 const (
@@ -57,6 +57,11 @@ type LoginRequest struct {
 	Email string `json="email"`
 }
 
+type LoginResponse struct {
+	Success           bool `json="success"`
+	IsAlreadyLoggedIn bool `json="is_already_logged_in"`
+}
+
 type LoginHandler struct {
 	db    *db.Database
 	cache *cache.SessionCache
@@ -76,6 +81,32 @@ func (lh *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	req.Name = html.EscapeString(req.Name)
 	req.Email = html.EscapeString(req.Email)
+
+	user, err := IsAuthenticated(r, lh.cache, lh.db)
+	if user != nil && err == nil {
+		cookie, err := r.Cookie("session_id")
+		if err != nil {
+			jsonifyErrf(w, http.StatusInternalServerError, "delete your cookies")
+			return
+		}
+
+		if user.EMail == req.Email {
+			// The email did not change and we are logged in already.
+			// Set the cookie again.
+			jsonify(w, http.StatusOK, &LoginResponse{
+				Success:           true,
+				IsAlreadyLoggedIn: true,
+			})
+			return
+		}
+
+		// Best to clean up the old session and make the user log in properly again:
+		// (he might want to change accounts for whatever reason)
+		if err := lh.cache.Forget(cookie.Value); err != nil {
+			jsonifyErrf(w, http.StatusInternalServerError, "forget failed: %v", err)
+			return
+		}
+	}
 
 	sessionID, err := uuid.NewV4()
 	if err != nil {
@@ -97,6 +128,11 @@ func (lh *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := lh.cache.Remember(userID, sessionID.String()); err != nil {
 		jsonifyErrf(w, http.StatusInternalServerError, "failed to remember session: %v", err)
 	}
+
+	jsonify(w, http.StatusOK, &LoginResponse{
+		Success:           true,
+		IsAlreadyLoggedIn: false,
+	})
 }
 
 func (lh *LoginHandler) NeedsAuthentication() bool {
@@ -179,8 +215,7 @@ func sendMail(from, to, subj, body, servername, password string) error {
 
 	// TLS config
 	tlsconfig := &tls.Config{
-		InsecureSkipVerify: true,
-		ServerName:         host,
+		ServerName: host,
 	}
 
 	// Here is the key, you need to call tls.Dial instead of smtp.Dial

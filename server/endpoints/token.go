@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/sahib/config"
 	"github.com/sahib/wedlist/cache"
 	"github.com/sahib/wedlist/db"
-	"github.com/sahib/config"
 )
 
 type TokenHandler struct {
@@ -61,6 +61,6 @@ func (th *TokenHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/list.html", http.StatusSeeOther)
 }
 
-func (rh *TokenHandler) NeedsAuthentication() bool {
+func (th *TokenHandler) NeedsAuthentication() bool {
 	return false
 }

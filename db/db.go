@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"sync"
 
+	// Load the sqlite3 module, we don't need anything from it.
 	_ "github.com/mattn/go-sqlite3"
 )
 

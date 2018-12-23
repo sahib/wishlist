@@ -10,10 +10,10 @@ import (
 
 	"github.com/NYTimes/gziphandler"
 	"github.com/gorilla/mux"
+	"github.com/sahib/config"
 	"github.com/sahib/wedlist/cache"
 	"github.com/sahib/wedlist/db"
 	"github.com/sahib/wedlist/server/endpoints"
-	"github.com/sahib/config"
 )
 
 type Server struct {
