@@ -1,0 +1,68 @@
+<html>
+    <head>
+        <title>List</title>
+        <link href="/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+        <link href="/css/default.css" rel="stylesheet">
+
+        <script src="/js/bootstrap.min.js"></script>
+        <script src="/js/jquery.min.js"></script>
+        <script src="/js/list.js"></script>
+    </head>
+    <body>
+		<h2></h2>
+		<noscript><strong>Please enable JavaScript in your browser!</strong></noscript>
+        <div class="container">
+				<div class="alert alert-info" role="alert">
+					<a href="#" class="close alert-closer" data-dismiss="alert" aria-label="close">&times;</a>
+					<small>
+					<strong>Glückwunsch!</strong> Du hast den Login überlebt.
+					<br />
+					<br />
+					Unten könnt ihr euch für ein Geschenk entscheiden und es reservieren, damit
+					es nicht noch jemand anders nimmt. Falls nichts dabei ist, könnt ihr auch unten
+					andere Sachen hinzufügen.
+					<strong>Denkt dran:</strong> Ihr müsst nichts schenken!
+					</small>
+				</div>
+			<table id="item-list" class="table table-striped">
+				<thead class="thead-dark">
+					<tr>
+					  <th scope="col">#</th>
+					  <th scope="col">Name</th>
+					  <th scope="col">Status</th>
+					  <th scope="col"></th>
+					</tr>
+				</thead>
+				<tbody id="item-list-body">
+				</tbody>
+			</table>
+		</div>
+        <div class="container">
+			<p><h2>Neues Geschenk hinzufügen:</p></h2>
+			<div class="alert alert-danger alert-dismissible" id="alert-add-item">
+				<a href="#" class="close alert-closer" data-dismiss="alert" aria-label="close">&times;</a>
+				<span id="alert-add-item-span">Lalalala</span>
+			</div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <form>
+                      <div class="form-group">
+                        <label for="inputName">Geschenkname:</label>
+                        <input type="text" class="form-control" id="inputItemName" placeholder="Name">
+                      </div>
+                      <div class="form-group">
+                        <label for="inputLink">Detail Link:</label>
+                        <input type="text" class="form-control" id="inputItemLink" placeholder="Link (optional)">
+                      </div>
+                      <div class="form-check">
+                        <button type="button" id="btn-add-item" class="btn btn-primary">Hinzufügen</button>
+                      </div>
+                    </form>
+                </div>
+            </div>
+			<br />
+			<br />
+			<small><p id="logged-in-as" class="pull-right text-info"></p></small>
+        </div>
+    </body>
+</html>

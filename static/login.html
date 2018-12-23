@@ -1,0 +1,52 @@
+<html>
+    <head>
+        <title>Login page</title>
+        <link href="/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+        <link href="/css/default.css" rel="stylesheet">
+
+        <script src="/js/bootstrap.min.js"></script>
+        <script src="/js/jquery.min.js"></script>
+        <script src="/js/login.js"></script>
+    </head>
+    <body>
+		<noscript><strong>Please enable JavaScript in your browser!</strong></noscript>
+		<div class"jumbotron d-flex align-items-center">
+			<div class="container">
+				<div class="row">
+					<img class="center" width="20%" height="20%" src="/images/icon.gif" />
+					<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+						<form="login-form">
+						  <div class="form-group">
+							<label for="inputName">Name</label>
+							<input type="text" class="form-control" id="inputLoginName" data-validation="length" data-validation-length="min4" placeholder="Name">
+						  </div>
+						  <div class="form-group">
+							<label for="inputEmail">Email address</label>
+							<input type="email" class="form-control" id="inputLoginEmail" data-validation="email" aria-describedby="emailHelp" placeholder="E-Mail eingeben">
+						  </div>
+						  <div class="form-check">
+							<button type="button" id="btn-login" class="btn btn-primary mx-auto">Send Login Mail</button>
+						  </div>
+						</form>
+					</div>
+				</div>
+				<br />
+				<div class="alert alert-info" role="alert">
+					<strong>Hallo!</strong>
+						<a href="#" class="close alert-closer" data-dismiss="alert" aria-label="close">&times;</a>
+					<br />
+					Schön dass ihr die Liste gefunden habt. Damit die Liste weiß wer ihr seid,
+					tragt bitte euren Namen und E-Mail oben ein. Nachdem ihr eure E-Mail bestätigt
+					habt werdet ihr auf die eigentliche Liste weitergeleitet. Wenn nicht, klickt
+					bitte diesen <a href="/list.html">Link</a>. Danke!
+				</div>
+				<div class="alert alert-success" role="alert" id="after-submit-alert">
+					<a href="#" class="close alert-closer" data-dismiss="alert" aria-label="close">&times;</a>
+				</div>
+				<div class="alert alert-warning" role="alert" id="error-box">
+					<a href="#" class="close alert-closer" data-dismiss="alert" aria-label="close">&times;</a>
+				</div>
+			</div>
+		</div>
+    </body>
+</html>
