@@ -8,7 +8,7 @@ require (
 	github.com/dgryski/go-farm v0.0.0-20180109070241-2de33835d102 // indirect
 	github.com/gofrs/uuid v3.1.0+incompatible
 	github.com/golang/protobuf v1.2.0 // indirect
-	github.com/gorilla/context v1.1.1 // indirect
+	github.com/gorilla/csrf v1.5.1
 	github.com/gorilla/mux v1.6.2
 	github.com/mattn/go-sqlite3 v1.10.0
 	github.com/pkg/errors v0.8.0

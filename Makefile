@@ -1,6 +1,9 @@
 build:
 	go install wedlist.go
 
+run:
+	go run wedlist.go
+
 test:
 	# New go test ignores vendor/
 	go test -v ./...

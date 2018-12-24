@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/csrf"
 	"github.com/sahib/wedlist/cache"
 	"github.com/sahib/wedlist/db"
 )
@@ -75,6 +76,7 @@ func (amw *AuthMiddleware) Middleware(next http.Handler) http.Handler {
 				return
 			}
 
+			w.Header().Set("X-CSRF-Token", csrf.Token(r))
 			r = r.WithContext(context.WithValue(r.Context(), userKey("user"), user))
 		}
 

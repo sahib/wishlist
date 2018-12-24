@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"crypto/rand"
 	"crypto/tls"
 	"fmt"
 	"log"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/NYTimes/gziphandler"
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/sahib/config"
 	"github.com/sahib/wedlist/cache"
@@ -66,11 +68,16 @@ func NewServer(cfg *config.Config, db *db.Database, cache *cache.SessionCache) *
 		log.Printf("warning: failed to load tls config: %v", err)
 	}
 
+	csrfKey := make([]byte, 32)
+	if _, err := rand.Read(csrfKey); err != nil {
+		log.Fatalf("failed to generate random csrf key: %v", err)
+	}
+
 	return &Server{
 		db: db,
 		srv: &http.Server{
 			Addr:              fmt.Sprintf(":%d", cfg.Int("server.port")),
-			Handler:           gziphandler.GzipHandler(router),
+			Handler:           gziphandler.GzipHandler(csrf.Protect(csrfKey)(router)),
 			ReadHeaderTimeout: 10 * time.Second,
 			WriteTimeout:      10 * time.Second,
 			IdleTimeout:       360 * time.Second,
