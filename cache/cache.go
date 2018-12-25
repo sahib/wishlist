@@ -8,12 +8,9 @@ import (
 	"github.com/dgraph-io/badger"
 )
 
-const (
-	expireTime = 48 * time.Hour
-)
-
 type SessionCache struct {
-	db *badger.DB
+	db         *badger.DB
+	expireTime time.Duration
 }
 
 type Session struct {
@@ -21,7 +18,7 @@ type Session struct {
 	IsConfirmed bool
 }
 
-func NewSessionCache(path string) (*SessionCache, error) {
+func NewSessionCache(path string, expireTime time.Duration) (*SessionCache, error) {
 	opts := badger.DefaultOptions
 	opts.Dir = path
 	opts.ValueDir = path
@@ -31,7 +28,10 @@ func NewSessionCache(path string) (*SessionCache, error) {
 		return nil, err
 	}
 
-	return &SessionCache{db: db}, nil
+	return &SessionCache{
+		db:         db,
+		expireTime: expireTime,
+	}, nil
 }
 
 func (sc *SessionCache) Close() error {
@@ -50,7 +50,7 @@ func (sc *SessionCache) Remember(userID int64, sessionID string) error {
 			return err
 		}
 
-		return txn.SetWithTTL([]byte(sessionID), buf.Bytes(), expireTime)
+		return txn.SetWithTTL([]byte(sessionID), buf.Bytes(), sc.expireTime)
 	})
 }
 
@@ -79,7 +79,7 @@ func (sc *SessionCache) Confirm(sessionID string) (int64, error) {
 		}
 
 		userID = sess.UserID
-		return txn.SetWithTTL([]byte(sessionID), buf.Bytes(), expireTime)
+		return txn.SetWithTTL([]byte(sessionID), buf.Bytes(), sc.expireTime)
 	})
 }
 

@@ -49,7 +49,7 @@ func (rh *ReserveHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		log.Printf("reserving item %d for user %s", req.ItemID, user.EMail)
+		log.Printf("reserving item %d for user %s (%d)", req.ItemID, user.EMail, user.ID)
 		if err := rh.db.Reserve(user.ID, req.ItemID); err != nil {
 			jsonifyErrf(w, http.StatusInternalServerError, "failed to reserve: %v", err)
 			return
@@ -64,13 +64,14 @@ func (rh *ReserveHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		log.Printf("Reserved for %d", resUserID)
 		if resUserID != user.ID {
 			jsonifyErrf(w, http.StatusUnauthorized, "wrong user")
 			return
 		}
 
 		log.Printf("unreserving item %d from user %s", req.ItemID, user.EMail)
-		if err := rh.db.Unreserve(user.ID, req.ItemID); err != nil {
+		if err := rh.db.Unreserve(req.ItemID); err != nil {
 			jsonifyErrf(w, http.StatusInternalServerError, "failed to unreserve: %v", err)
 			return
 		}

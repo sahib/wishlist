@@ -45,10 +45,8 @@ function updateList() {
                         contentType : 'application/json',
                         type : 'POST',
                     });
-                    // updateList()
                 })
-            }
-            if(item.is_reserved && item.is_own) {
+            } else if(item.is_reserved_by_us) {
                 btn = $('<button class="btn btn-sm btn-outline-danger">').text("Reservierung aufheben")
                 btn.on('click', function(){
                     $.ajax("/api/v0/reserve", {
@@ -59,11 +57,8 @@ function updateList() {
                         contentType : 'application/json',
                         type : 'POST',
                     });
-                    // updateList()
                 });
-            }
-
-            if(item.is_reserved && !item.is_own) {
+            } else if(item.is_reserved && !item.is_reserved_by_us) {
                 btn = $('<button class="btn btn-sm btn-outline-dark disabled">').text("Bereits reserviert")
             }
 

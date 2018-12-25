@@ -22,17 +22,11 @@ CREATE TABLE IF NOT EXISTS items(
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
     link TEXT NOT NULL,
-	created_by INTEGER,
+	created_by INTEGER NOT NULL,
+	reserved_by INTEGER,
 
+    FOREIGN KEY(reserved_by) REFERENCES users(id),
     FOREIGN KEY(created_by) REFERENCES users(id)
-);
-
-CREATE TABLE IF NOT EXISTS reservations(
-    user_id INTEGER,
-    item_id INTEGER,
-
-    FOREIGN KEY(user_id) REFERENCES users(id),
-    FOREIGN KEY(item_id) REFERENCES items(id)
 );
 `
 )
@@ -44,10 +38,12 @@ type User struct {
 }
 
 type Item struct {
-	ID    int64  `json:"id"`
-	Name  string `json:"name"`
-	Link  string `json:"link,omitempty"`
-	IsOwn bool   `json:"is_own"`
+	ID             int64  `json:"id"`
+	Name           string `json:"name"`
+	Link           string `json:"link,omitempty"`
+	IsOwn          bool   `json:"is_own"`
+	IsReserved     bool   `json:"is_reserved"`
+	IsReservedByUs bool   `json:"is_reserved_by_us"`
 }
 
 type Database struct {
@@ -56,8 +52,7 @@ type Database struct {
 	db             *sql.DB
 	userInsertStmt *sql.Stmt
 	itemInsertStmt *sql.Stmt
-	rsrvInsertStmt *sql.Stmt
-	rsrvDeleteStmt *sql.Stmt
+	rsrvUpdateStmt *sql.Stmt
 	itemDeleteStmt *sql.Stmt
 }
 
@@ -76,17 +71,12 @@ func NewDatabase(path string) (*Database, error) {
 		return nil, err
 	}
 
-	itemInsertStmt, err := db.Prepare("INSERT INTO items(name, link, created_by) VALUES(?, ?, ?);")
+	itemInsertStmt, err := db.Prepare("INSERT INTO items(name, link, created_by, reserved_by) VALUES(?, ?, ?, ?);")
 	if err != nil {
 		return nil, err
 	}
 
-	rsrvInsertStmt, err := db.Prepare("INSERT INTO reservations(user_id, item_id) VALUES(?, ?);")
-	if err != nil {
-		return nil, err
-	}
-
-	rsrvDeleteStmt, err := db.Prepare("DELETE FROM reservations WHERE user_id = ? AND item_id = ?;")
+	rsrvUpdateStmt, err := db.Prepare("UPDATE items SET reserved_by = ? WHERE id = ?;")
 	if err != nil {
 		return nil, err
 	}
@@ -100,8 +90,7 @@ func NewDatabase(path string) (*Database, error) {
 		db:             db,
 		userInsertStmt: userInsertStmt,
 		itemInsertStmt: itemInsertStmt,
-		rsrvInsertStmt: rsrvInsertStmt,
-		rsrvDeleteStmt: rsrvDeleteStmt,
+		rsrvUpdateStmt: rsrvUpdateStmt,
 		itemDeleteStmt: itemDeleteStmt,
 	}, nil
 }
@@ -164,7 +153,7 @@ func (db *Database) AddItem(name, link string, createdBy int64) (int64, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	res, err := db.itemInsertStmt.Exec(name, link, createdBy)
+	res, err := db.itemInsertStmt.Exec(name, link, createdBy, nil)
 	if err != nil {
 		return -1, err
 	}
@@ -176,11 +165,6 @@ func (db *Database) DeleteItem(userID, itemID int64) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	// need to make sure that we do not have a reservation still:
-	if err := db.unreserve(userID, itemID); err != nil {
-		return err
-	}
-
 	_, err := db.itemDeleteStmt.Exec(itemID, userID)
 	return err
 }
@@ -189,7 +173,7 @@ func (db *Database) GetItems(userID int64) ([]*Item, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	rows, err := db.db.Query("SELECT id, name, link, created_by FROM items;")
+	rows, err := db.db.Query("SELECT id, name, link, created_by, reserved_by FROM items;")
 	if err != nil {
 		return nil, err
 	}
@@ -200,11 +184,14 @@ func (db *Database) GetItems(userID int64) ([]*Item, error) {
 	for rows.Next() {
 		item := &Item{}
 		createdBy := int64(0)
-		if err := rows.Scan(&item.ID, &item.Name, &item.Link, &createdBy); err != nil {
+		reservedBy := sql.NullInt64{}
+		if err := rows.Scan(&item.ID, &item.Name, &item.Link, &createdBy, &reservedBy); err != nil {
 			return nil, err
 		}
 
 		item.IsOwn = userID == createdBy
+		item.IsReserved = reservedBy.Valid
+		item.IsReservedByUs = reservedBy.Valid && reservedBy.Int64 == userID
 		items = append(items, item)
 	}
 
@@ -219,19 +206,15 @@ func (db *Database) Reserve(userID, itemID int64) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	_, err := db.rsrvInsertStmt.Exec(userID, itemID)
+	_, err := db.rsrvUpdateStmt.Exec(userID, itemID)
 	return err
 }
 
-func (db *Database) Unreserve(userID, itemID int64) error {
+func (db *Database) Unreserve(itemID int64) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	return db.unreserve(userID, itemID)
-}
-
-func (db *Database) unreserve(userID, itemID int64) error {
-	_, err := db.rsrvDeleteStmt.Exec(userID, itemID)
+	_, err := db.rsrvUpdateStmt.Exec(sql.NullInt64{}, itemID)
 	return err
 }
 
@@ -239,9 +222,9 @@ func (db *Database) GetUserForReservation(itemID int64) (int64, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	row := db.db.QueryRow("SELECT user_id FROM reservations WHERE item_id = ?;", itemID)
-	userID := int64(0)
-	err := row.Scan(&userID)
+	row := db.db.QueryRow("SELECT reserved_by FROM items WHERE id = ?;", itemID)
+	reservedBy := sql.NullInt64{}
+	err := row.Scan(&reservedBy)
 	if err == sql.ErrNoRows {
 		return -1, nil
 	}
@@ -250,5 +233,9 @@ func (db *Database) GetUserForReservation(itemID int64) (int64, error) {
 		return -1, err
 	}
 
-	return userID, nil
+	if !reservedBy.Valid {
+		return -1, nil
+	}
+
+	return reservedBy.Int64, nil
 }

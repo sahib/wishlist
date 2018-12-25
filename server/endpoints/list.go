@@ -6,15 +6,10 @@ import (
 	"github.com/sahib/wedlist/db"
 )
 
-type ListItem struct {
-	*db.Item
-	IsReserved bool `json:"is_reserved"`
-}
-
 type ListResponse struct {
 	Success bool       `json:"success"`
 	Message string     `json:"message,omitempty"`
-	Items   []ListItem `json:"items,omitempty"`
+	Items   []*db.Item `json:"items,omitempty"`
 }
 
 type ListHandler struct {
@@ -38,27 +33,9 @@ func (lh *ListHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lsi := []ListItem{}
-	for _, item := range items {
-		resUserID, err := lh.db.GetUserForReservation(item.ID)
-		if err != nil {
-			jsonifyErrf(
-				w,
-				http.StatusInternalServerError,
-				"failed to get reservation from db: %v", err,
-			)
-			return
-		}
-
-		lsi = append(lsi, ListItem{
-			Item:       item,
-			IsReserved: resUserID >= 0,
-		})
-	}
-
 	jsonify(w, http.StatusOK, &ListResponse{
 		Success: true,
-		Items:   lsi,
+		Items:   items,
 	})
 }
 

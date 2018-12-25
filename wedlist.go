@@ -44,7 +44,10 @@ func main() {
 		}
 	}
 
-	cache, err := cache.NewSessionCache(cfg.String("database.session_cache"))
+	cache, err := cache.NewSessionCache(
+		cfg.String("database.session_cache"),
+		cfg.Duration("auth.expire_time"),
+	)
 	if err != nil {
 		log.Fatalf("failed to open cache: %v", err)
 	}

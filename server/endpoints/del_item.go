@@ -29,7 +29,6 @@ func (dh *DelHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("DEL REQ: %v", req)
 	user, ok := r.Context().Value(userKey("user")).(*db.User)
 	if !ok {
 		jsonifyErrf(w, http.StatusInternalServerError, "no user in context")
