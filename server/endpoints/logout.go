@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/sahib/wedlist/cache"
@@ -26,6 +27,7 @@ func (lh *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("session %s logged out", cookie.Value)
 	jsonifyErrf(w, http.StatusOK, "OK")
 }
 

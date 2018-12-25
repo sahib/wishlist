@@ -176,6 +176,11 @@ func (db *Database) DeleteItem(userID, itemID int64) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
+	// need to make sure that we do not have a reservation still:
+	if err := db.unreserve(userID, itemID); err != nil {
+		return err
+	}
+
 	_, err := db.itemDeleteStmt.Exec(itemID, userID)
 	return err
 }
@@ -222,6 +227,10 @@ func (db *Database) Unreserve(userID, itemID int64) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
+	return db.unreserve(userID, itemID)
+}
+
+func (db *Database) unreserve(userID, itemID int64) error {
 	_, err := db.rsrvDeleteStmt.Exec(userID, itemID)
 	return err
 }

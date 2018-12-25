@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"crypto/rand"
 	"crypto/tls"
 	"fmt"
 	"log"
@@ -10,8 +9,8 @@ import (
 	"time"
 
 	"github.com/NYTimes/gziphandler"
-	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
+	"github.com/jcuga/golongpoll"
 	"github.com/sahib/config"
 	"github.com/sahib/wedlist/cache"
 	"github.com/sahib/wedlist/db"
@@ -19,9 +18,10 @@ import (
 )
 
 type Server struct {
-	db    *db.Database
-	srv   *http.Server
-	cache *cache.SessionCache
+	db      *db.Database
+	srv     *http.Server
+	cache   *cache.SessionCache
+	pollMgr *golongpoll.LongpollManager
 }
 
 func getTLSConfig(cfg *config.Config) (*tls.Config, error) {
@@ -44,15 +44,23 @@ func getTLSConfig(cfg *config.Config) (*tls.Config, error) {
 	return nil, nil
 }
 
-func NewServer(cfg *config.Config, db *db.Database, cache *cache.SessionCache) *Server {
+func NewServer(cfg *config.Config, db *db.Database, cache *cache.SessionCache) (*Server, error) {
+	pollMgr, err := golongpoll.StartLongpoll(golongpoll.Options{
+		LoggingEnabled: false,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	router := mux.NewRouter()
 	router.Handle("/api/v0/list", endpoints.NewListHandler(db)).Methods("GET")
-	router.Handle("/api/v0/add", endpoints.NewAddHandler(db)).Methods("POST")
-	router.Handle("/api/v0/delete", endpoints.NewDelHandler(db)).Methods("POST")
-	router.Handle("/api/v0/reserve", endpoints.NewReserveHandler(db)).Methods("POST")
+	router.Handle("/api/v0/add", endpoints.NewAddHandler(db, pollMgr)).Methods("POST")
+	router.Handle("/api/v0/delete", endpoints.NewDelHandler(db, pollMgr)).Methods("POST")
+	router.Handle("/api/v0/reserve", endpoints.NewReserveHandler(db, pollMgr)).Methods("POST")
 	router.Handle("/api/v0/login", endpoints.NewLoginHandler(db, cache, cfg)).Methods("POST")
 	router.Handle("/api/v0/logout", endpoints.NewLogoutHandler(cache)).Methods("GET")
 	router.Handle("/api/v0/token/{token}", endpoints.NewTokenHandler(db, cache, cfg)).Methods("GET")
+	router.HandleFunc("/api/v0/events", pollMgr.SubscriptionHandler)
 
 	// Redirects to either login or list view:
 	router.Handle("/", endpoints.NoAuth(&indexHandler{db: db, cache: cache}))
@@ -68,22 +76,18 @@ func NewServer(cfg *config.Config, db *db.Database, cache *cache.SessionCache) *
 		log.Printf("warning: failed to load tls config: %v", err)
 	}
 
-	csrfKey := make([]byte, 32)
-	if _, err := rand.Read(csrfKey); err != nil {
-		log.Fatalf("failed to generate random csrf key: %v", err)
-	}
-
 	return &Server{
-		db: db,
+		db:      db,
+		pollMgr: pollMgr,
 		srv: &http.Server{
 			Addr:              fmt.Sprintf(":%d", cfg.Int("server.port")),
-			Handler:           gziphandler.GzipHandler(csrf.Protect(csrfKey)(router)),
+			Handler:           gziphandler.GzipHandler(router),
 			ReadHeaderTimeout: 10 * time.Second,
 			WriteTimeout:      10 * time.Second,
 			IdleTimeout:       360 * time.Second,
 			TLSConfig:         tlsConfig,
 		},
-	}
+	}, nil
 }
 
 type indexHandler struct {
@@ -119,5 +123,6 @@ func (srv *Server) Terminate() error {
 }
 
 func (srv *Server) Close() error {
+	srv.pollMgr.Shutdown()
 	return srv.srv.Close()
 }

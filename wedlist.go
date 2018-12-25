@@ -58,7 +58,11 @@ func main() {
 
 	defer db.Close()
 
-	srv := server.NewServer(cfg, db, cache)
+	srv, err := server.NewServer(cfg, db, cache)
+	if err != nil {
+		log.Fatalf("failed to create server: %v", err)
+	}
+
 	defer srv.Close()
 
 	go func() {

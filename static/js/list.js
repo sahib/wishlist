@@ -29,134 +29,151 @@ function eraseCookie(name) {
 }
 
 function updateList() {
-	$('#item-list-body > tr').remove()
-
+    $('#item-list-body > tr').remove();
     $.get("/api/v0/list", function(data) {
         $.each(data["items"], function(index, item) {
-			var btn = null
+            var btn = null
 
-			if(!item.is_reserved) {
-				btn = $('<button class="btn btn-sm btn-outline-success">').text("Reservieren")
-				btn.on('click', function(){
-					$.ajax("/api/v0/reserve", {
-						data : JSON.stringify({
-							"item_id": item.id,
-							"do_reserve": true,
-						}),
-						contentType : 'application/json',
-						type : 'POST',
-					});
-					updateList()
-				})
-			}
-			if(item.is_reserved && item.is_own) {
-				btn = $('<button class="btn btn-sm btn-outline-danger">').text("Reservierung aufheben")
-				btn.on('click', function(){
-					$.ajax("/api/v0/reserve", {
-						data : JSON.stringify({
-							"item_id": item.id,
-							"do_reserve": false,
-						}),
-						contentType : 'application/json',
-						type : 'POST',
-					});
-					updateList()
-				});
-			}
+            if(!item.is_reserved) {
+                btn = $('<button class="btn btn-sm btn-outline-success">').text("Reservieren")
+                btn.on('click', function(){
+                    $.ajax("/api/v0/reserve", {
+                        data : JSON.stringify({
+                            "item_id": item.id,
+                            "do_reserve": true,
+                        }),
+                        contentType : 'application/json',
+                        type : 'POST',
+                    });
+                    // updateList()
+                })
+            }
+            if(item.is_reserved && item.is_own) {
+                btn = $('<button class="btn btn-sm btn-outline-danger">').text("Reservierung aufheben")
+                btn.on('click', function(){
+                    $.ajax("/api/v0/reserve", {
+                        data : JSON.stringify({
+                            "item_id": item.id,
+                            "do_reserve": false,
+                        }),
+                        contentType : 'application/json',
+                        type : 'POST',
+                    });
+                    // updateList()
+                });
+            }
 
-			if(item.is_reserved && !item.is_own) {
-				btn = $('<button class="btn btn-sm btn-outline-dark disabled">').text("Bereits reserviert")
-			}
+            if(item.is_reserved && !item.is_own) {
+                btn = $('<button class="btn btn-sm btn-outline-dark disabled">').text("Bereits reserviert")
+            }
 
-			// var closer = $('<a href="#" class="close alert-closer" data-dismiss="alert" aria-label="close">&times;</a>')
-			var closer = $('<a>')
-				.attr('href', '#')
-				.attr('class', 'close alert-closer')
-				.attr('data-dismiss', 'alert')
-				.attr('aria-label', 'close')
-				.html('&times;')
+            // var closer = $('<a href="#" class="close alert-closer" data-dismiss="alert" aria-label="close">&times;</a>')
+            var closer = $('<a>')
+                .attr('href', '#')
+                .attr('class', 'close alert-closer')
+                .attr('data-dismiss', 'alert')
+                .attr('aria-label', 'close')
+                .html('&times;')
 
-			closer.on('click', function(){
-					$.ajax("/api/v0/delete", {
-						data : JSON.stringify({
-							"itemid": item.id,
-						}),
-						contentType : 'application/json',
-						type : 'POST',
-					});
-					updateList()
-			});
+            closer.on('click', function(){
+                    $.ajax("/api/v0/delete", {
+                        data : JSON.stringify({
+                            "itemid": item.id,
+                        }),
+                        contentType : 'application/json',
+                        type : 'POST',
+                    });
+                    // updateList()
+            });
 
             var row = $("<tr>")
-				.append($('<th scope="row">').text(index + 1))
-				.append($('<td>').append('<a href="'+item.link+'">'+item.name+'</a>'))
-				.append($('<td>').append(btn))
+                .append($('<th scope="row">').text(index + 1))
+                .append($('<td>').append('<a href="'+item.link+'">'+item.name+'</a>'))
+                .append($('<td>').append(btn))
 
-			if(item.is_own) {
-				row.append($('<td>').append(closer))
-			} else {
-				row.append($('<td>'))
-			}
+            if(item.is_own) {
+                row.append($('<td>').append(closer))
+            } else {
+                row.append($('<td>'))
+            }
 
-			$("#item-list-body").append(row)
+            $("#item-list-body").append(row)
 
-			var logout = $('<a href="#">Logout</a>')
-			logout.on('click', function() {
-				$.ajax("/api/v0/logout", {
-					type : 'GET',
-				});
+            var logout = $('<a href="#">Logout</a>')
+            logout.on('click', function() {
+                $.ajax("/api/v0/logout", {
+                    type : 'GET',
+                });
 
-				eraseCookie("user_name");
-				eraseCookie("user_email");
-				eraseCookie("session_id");
-				window.location.replace("/login.html")
-			})
+                eraseCookie("user_name");
+                eraseCookie("user_email");
+                eraseCookie("session_id");
+                window.location.replace("/login.html")
+            })
 
-			$("#logged-in-as").html(
-				'Eingeloggt als ' + getCookie('user_name') + ' (' + getCookie('user_email') + ')' +
-				' | <a href="https://github.com/sahib/wedlist">Quelltext dieser Seite</a>' +
-				' | '
-			).append(logout);
+            $("#logged-in-as").html(
+                'Eingeloggt als ' + getCookie('user_name') + ' (' + getCookie('user_email') + ')' +
+                ' | <a href="https://github.com/sahib/wedlist">Quelltext dieser Seite</a>' +
+                ' | '
+            ).append(logout);
         });
     }).fail(function() {
-		$("#alert-add-item").show()
-		$("#alert-add-item-span").text("Server antwortet nicht. Bist du auch eingeloggt?");
+        $("#alert-add-item").show()
+        $("#alert-add-item-span").text("Server antwortet nicht. Bist du auch eingeloggt?");
     })
 }
 
+function pollServer(delay) {
+    window.setTimeout(function() {
+        $.ajax({
+            timeout: 60000,
+            url: "/api/v0/events?timeout=60&category=list-change",
+            type: "GET",
+            dataType: "json",
+            success: function(result) {
+                updateList();
+                pollServer(100);
+            },
+            error: function(data, e, m) {
+                pollServer(1000);
+            }});
+    }, delay);
+}
+
 $(document).ready(function(){
-	// Hide all alerts by default:
-	$(".alert").hide()
-	$(".alert-info").show()
-	$(".alert-closer").click(function() {
-		$(this).parent().toggle()
-	})
+    // Hide all alerts by default:
+    $(".alert").hide()
+    $(".alert-info").show()
+    $(".alert-closer").click(function() {
+        $(this).parent().toggle()
+    })
 
-	updateList()
+    updateList();
+    pollServer(0);
 
-	$("#btn-add-item").on('click', function(){
-		var name = $("#inputItemName").val()
-		var link = $("#inputItemLink").val()
-		if(name.length < 1) {
-			$("#alert-add-item").show()
-			$("#alert-add-item-span").text("Bitte gib ein Geschenknamen ein.");
-			return
-		}
+    $("#btn-add-item").on('click', function(){
+        var name = $("#inputItemName").val()
+        var link = $("#inputItemLink").val()
+        if(name.length < 1) {
+            $("#alert-add-item").show()
+            $("#alert-add-item-span").text("Bitte gib ein Geschenknamen ein.");
+            return
+        }
 
-		if(link == "" || !isURL(link)) {
-			$("#alert-add-item").show()
-			$("#alert-add-item-span").text("Bitte gib eine valide URL ein.");
-			return
-		}
+        if(link == "" || !isURL(link)) {
+            $("#alert-add-item").show()
+            $("#alert-add-item-span").text("Bitte gib eine valide URL ein.");
+            return
+        }
 
-		$.ajax("/api/v0/add", {
-			data : JSON.stringify({
-				"name": name,
-				"link": link,
-			}),
-			contentType : 'application/json',
-			type : 'POST',
-		});
-		updateList()
+        $.ajax("/api/v0/add", {
+            data : JSON.stringify({
+                "name": name,
+                "link": link,
+            }),
+            contentType : 'application/json',
+            type : 'POST',
+        });
+        // updateList()
     });
 });

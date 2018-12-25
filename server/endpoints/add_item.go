@@ -3,8 +3,10 @@ package endpoints
 import (
 	"encoding/json"
 	"html"
+	"log"
 	"net/http"
 
+	"github.com/jcuga/golongpoll"
 	"github.com/sahib/wedlist/db"
 )
 
@@ -14,11 +16,12 @@ type AddRequest struct {
 }
 
 type AddHandler struct {
-	db *db.Database
+	db      *db.Database
+	pollMgr *golongpoll.LongpollManager
 }
 
-func NewAddHandler(db *db.Database) *AddHandler {
-	return &AddHandler{db: db}
+func NewAddHandler(db *db.Database, pollMgr *golongpoll.LongpollManager) *AddHandler {
+	return &AddHandler{db: db, pollMgr: pollMgr}
 }
 
 func (ah *AddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -38,6 +41,11 @@ func (ah *AddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if _, err := ah.db.AddItem(req.Name, req.Link, user.ID); err != nil {
 		jsonifyErrf(w, http.StatusInternalServerError, "failed to add to database: %v", err)
 		return
+	}
+
+	log.Printf("add new item: %s", req.Name)
+	if err := ah.pollMgr.Publish("list-change", "add"); err != nil {
+		log.Printf("failed to publish event: %v", err)
 	}
 
 	jsonifyErrf(w, http.StatusCreated, "OK")

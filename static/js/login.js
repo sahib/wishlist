@@ -4,33 +4,33 @@ function isEmail(email) {
 }
 
 $(document).ready(function(){
-	$(".alert-closer").click(function() {
-		$(this).parent().toggle()
-	})
+    $(".alert-closer").click(function() {
+        $(this).parent().toggle()
+    })
 
-	var afterSubmitAlert = $("#after-submit-alert")
-	afterSubmitAlert.hide();
+    var afterSubmitAlert = $("#after-submit-alert")
+    afterSubmitAlert.hide();
 
-	var errorBox = $("#error-box")
-	errorBox.hide();
+    var errorBox = $("#error-box")
+    errorBox.hide();
 
-	$("#btn-login").on('click', function(){
-		var name = $("#inputLoginName").val()
-		var email = $("#inputLoginEmail").val()
+    $("#btn-login").on('click', function(){
+        var name = $("#inputLoginName").val()
+        var email = $("#inputLoginEmail").val()
 
-		if(name.length <= 2) {
-			errorBox.text("Bitte gib einen Namen mit mindestens 3 Zeichen ein.")
-			errorBox.show()
-			return
-		}
+        if(name.length <= 2) {
+            errorBox.text("Bitte gib einen Namen mit mindestens 3 Zeichen ein.")
+            errorBox.show()
+            return
+        }
 
-		if(!isEmail(email)) {
-			errorBox.text('"' + email + '" is keine valide E-Mail Adresse.')
-			errorBox.show()
-			return
-		}
+        if(!isEmail(email)) {
+            errorBox.text('"' + email + '" is keine valide E-Mail Adresse.')
+            errorBox.show()
+            return
+        }
 
-		errorBox.hide()
+        errorBox.hide()
 
         $.ajax({
             url: "/api/v0/login",
@@ -47,7 +47,7 @@ $(document).ready(function(){
                 console.log("DATA " + data, data.Success, data.IsAlreadyLoggedIn)
                 if(data.IsAlreadyLoggedIn) {
                     afterSubmitAlert.text('Bereits eingeloggt. Leite weiter.');
-				    window.location.replace("/list.html")
+                    window.location.replace("/list.html")
                 } else {
                     afterSubmitAlert.text(
                         'Es wurde eine E-Mail an "' + email + '" geschickt. Bitte klicke auf den darin enthaltenen Link.'

@@ -25,7 +25,7 @@ const (
 Hallo!
 <br />
 <br />
-Du kriegst diese Mail weil du dich auf der Geschenkeliste angemeldet hast. <br />
+Du bekommst diese Mail weil du dich auf der Geschenkeliste angemeldet hast. <br />
 Wenn du nicht weißt warum du diese EMail bekommst, ignoriere sie bitte einfach.
 <br />
 <br />
@@ -129,6 +129,8 @@ func (lh *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		jsonifyErrf(w, http.StatusInternalServerError, "failed to remember session: %v", err)
 	}
 
+	log.Printf("new login request; sending mail to %s", req.Email)
+
 	jsonify(w, http.StatusOK, &LoginResponse{
 		Success:           true,
 		IsAlreadyLoggedIn: false,
@@ -181,7 +183,7 @@ func (lh *LoginHandler) sendLoginlMail(req *LoginRequest, uuid uuid.UUID) error 
 	}
 
 	return sendMail(
-		"christopher@ira-kunststoffe.de",
+		lh.cfg.String("mail.from"),
 		req.Email,
 		"Login zur Geschenkliste",
 		buf.String(),

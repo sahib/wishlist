@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -58,6 +59,7 @@ func (th *TokenHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
+	log.Printf("cookies set for %s (%s)", user.Name, user.EMail)
 	http.Redirect(w, r, "/list.html", http.StatusSeeOther)
 }
 

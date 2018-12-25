@@ -2,8 +2,10 @@ package endpoints
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
+	"github.com/jcuga/golongpoll"
 	"github.com/sahib/wedlist/db"
 )
 
@@ -12,11 +14,12 @@ type DelRequest struct {
 }
 
 type DelHandler struct {
-	db *db.Database
+	db      *db.Database
+	pollMgr *golongpoll.LongpollManager
 }
 
-func NewDelHandler(db *db.Database) *DelHandler {
-	return &DelHandler{db: db}
+func NewDelHandler(db *db.Database, pollMgr *golongpoll.LongpollManager) *DelHandler {
+	return &DelHandler{db: db, pollMgr: pollMgr}
 }
 
 func (dh *DelHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -26,6 +29,7 @@ func (dh *DelHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("DEL REQ: %v", req)
 	user, ok := r.Context().Value(userKey("user")).(*db.User)
 	if !ok {
 		jsonifyErrf(w, http.StatusInternalServerError, "no user in context")
@@ -35,6 +39,11 @@ func (dh *DelHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := dh.db.DeleteItem(user.ID, req.ItemID); err != nil {
 		jsonifyErrf(w, http.StatusInternalServerError, "failed to delete in db: %v", err)
 		return
+	}
+
+	log.Printf("user %s deleted item %d", user.EMail, req.ItemID)
+	if err := dh.pollMgr.Publish("list-change", "del"); err != nil {
+		log.Printf("failed to publish event: %v", err)
 	}
 
 	jsonifyErrf(w, http.StatusOK, "OK")

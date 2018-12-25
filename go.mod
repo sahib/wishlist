@@ -10,7 +10,9 @@ require (
 	github.com/golang/protobuf v1.2.0 // indirect
 	github.com/gorilla/csrf v1.5.1
 	github.com/gorilla/mux v1.6.2
+	github.com/jcuga/golongpoll v1.1.0
 	github.com/mattn/go-sqlite3 v1.10.0
+	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/pkg/errors v0.8.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sahib/config v0.2.0
