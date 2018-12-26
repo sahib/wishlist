@@ -32,7 +32,7 @@ Wenn du nicht weißt warum du diese EMail bekommst, ignoriere sie bitte einfach.
 Bitte klicke auf diesen Link, damit wir wirklich wissen, dass du du bist:
 <br />
 <br />
-	<a>https://{{.Domain}}/api/v0/token/{{.SessionID}}</a>
+	<a href="https://{{.Domain}}/api/v0/token/{{.SessionID}}">https://{{.Domain}}/api/v0/token/{{.SessionID}}</a>
 <br />
 <br />
 Danke!

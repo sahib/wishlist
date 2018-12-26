@@ -79,9 +79,14 @@ function updateList() {
                     });
             });
 
+            var linkText = item.name
+            if(item.link != undefined && item.link == "") {
+                linkText = '<a href="'+item.link+'">'+item.name+'</a>'
+            }
+
             var row = $("<tr>")
                 .append($('<th scope="row">').text(index + 1))
-                .append($('<td>').append('<a href="'+item.link+'">'+item.name+'</a>'))
+                .append($('<td>').append(linkText))
                 .append($('<td>').append(btn))
 
             if(item.is_own) {
@@ -153,10 +158,12 @@ $(document).ready(function(){
             return
         }
 
-        if(link == "" || !isURL(link)) {
-            $("#alert-add-item").show()
-            $("#alert-add-item-span").text("Bitte gib eine valide URL ein.");
-            return
+        if(link != "") {
+            if(!isURL(link)) {
+                $("#alert-add-item").show()
+                $("#alert-add-item-span").text("Bitte gib eine valide URL ein.");
+                return
+            }
         }
 
         $.ajax("/api/v0/add", {
