@@ -62,7 +62,6 @@ function updateList() {
                 btn = $('<button class="btn btn-sm btn-outline-dark disabled">').text("Bereits reserviert")
             }
 
-            // var closer = $('<a href="#" class="close alert-closer" data-dismiss="alert" aria-label="close">&times;</a>')
             var closer = $('<a>')
                 .attr('href', '#')
                 .attr('class', 'close alert-closer')
@@ -78,7 +77,6 @@ function updateList() {
                         contentType : 'application/json',
                         type : 'POST',
                     });
-                    // updateList()
             });
 
             var row = $("<tr>")
@@ -169,6 +167,5 @@ $(document).ready(function(){
             contentType : 'application/json',
             type : 'POST',
         });
-        // updateList()
     });
 });

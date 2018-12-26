@@ -3,6 +3,23 @@ function isEmail(email) {
     return regex.test(email);
 }
 
+function pollServerForLogin(delay) {
+    // try to list items until we succeed (i.e. we logged in)
+    window.setTimeout(function() {
+        $.ajax({
+            timeout: 60000,
+            url: "/api/v0/list",
+            type: "GET",
+            dataType: "json",
+            success: function(result) {
+                window.location.replace("/list.html");
+            },
+            error: function(data, e, m) {
+                pollServerForLogin(1000);
+            }});
+    }, delay);
+}
+
 $(document).ready(function(){
     $(".alert-closer").click(function() {
         $(this).parent().toggle()
@@ -52,6 +69,7 @@ $(document).ready(function(){
                     afterSubmitAlert.text(
                         'Es wurde eine E-Mail an "' + email + '" geschickt. Bitte klicke auf den darin enthaltenen Link.'
                     );
+                    pollServerForLogin(1000)
                 }
             },
         });
