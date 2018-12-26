@@ -8,10 +8,10 @@ import (
 	"syscall"
 
 	"github.com/sahib/config"
-	"github.com/sahib/wedlist/cache"
-	"github.com/sahib/wedlist/db"
-	"github.com/sahib/wedlist/defaults"
-	"github.com/sahib/wedlist/server"
+	"github.com/sahib/wishlist/cache"
+	"github.com/sahib/wishlist/db"
+	"github.com/sahib/wishlist/defaults"
+	"github.com/sahib/wishlist/server"
 )
 
 func main() {

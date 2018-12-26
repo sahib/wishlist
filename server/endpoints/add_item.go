@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/jcuga/golongpoll"
-	"github.com/sahib/wedlist/db"
+	"github.com/sahib/wishlist/db"
 )
 
 type AddRequest struct {

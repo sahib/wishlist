@@ -12,9 +12,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jcuga/golongpoll"
 	"github.com/sahib/config"
-	"github.com/sahib/wedlist/cache"
-	"github.com/sahib/wedlist/db"
-	"github.com/sahib/wedlist/server/endpoints"
+	"github.com/sahib/wishlist/cache"
+	"github.com/sahib/wishlist/db"
+	"github.com/sahib/wishlist/server/endpoints"
 )
 
 type Server struct {

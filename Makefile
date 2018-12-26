@@ -1,8 +1,8 @@
 build:
-	go install wedlist.go
+	go install wishlist.go
 
 run:
-	go run wedlist.go
+	go run wishlist.go
 
 test:
 	# New go test ignores vendor/

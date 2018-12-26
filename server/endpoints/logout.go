@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/sahib/wedlist/cache"
+	"github.com/sahib/wishlist/cache"
 )
 
 type LogoutHandler struct {

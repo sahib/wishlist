@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/sahib/wedlist/cache"
-	"github.com/sahib/wedlist/db"
+	"github.com/sahib/wishlist/cache"
+	"github.com/sahib/wishlist/db"
 )
 
 type userKey string

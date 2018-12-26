@@ -3,7 +3,7 @@ package endpoints
 import (
 	"net/http"
 
-	"github.com/sahib/wedlist/db"
+	"github.com/sahib/wishlist/db"
 )
 
 type ListResponse struct {

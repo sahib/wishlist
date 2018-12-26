@@ -7,8 +7,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/sahib/config"
-	"github.com/sahib/wedlist/cache"
-	"github.com/sahib/wedlist/db"
+	"github.com/sahib/wishlist/cache"
+	"github.com/sahib/wishlist/db"
 )
 
 type TokenHandler struct {

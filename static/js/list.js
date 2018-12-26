@@ -111,7 +111,7 @@ function updateList() {
 
             $("#logged-in-as").html(
                 'Eingeloggt als ' + getCookie('user_name') + ' (' + getCookie('user_email') + ')' +
-                ' | <a href="https://github.com/sahib/wedlist">Quelltext dieser Seite</a>' +
+                ' | <a href="https://github.com/sahib/wishlist">Quelltext dieser Seite</a>' +
                 ' | '
             ).append(logout);
         });
