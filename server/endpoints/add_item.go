@@ -38,7 +38,7 @@ func (ah *AddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req.Name = html.EscapeString(req.Name)
-	if _, err := ah.db.AddItem(req.Name, req.Link, user.ID); err != nil {
+	if _, err := ah.db.AddItem(req.Name, req.Link, user.ID, user.ID); err != nil {
 		jsonifyErrf(w, http.StatusInternalServerError, "failed to add to database: %v", err)
 		return
 	}

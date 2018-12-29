@@ -117,7 +117,10 @@ function updateList() {
         });
     }).fail(function() {
         $("#alert-add-item").show()
-        $("#alert-add-item-span").text("Server antwortet nicht. Bist du auch eingeloggt?");
+        $("#alert-add-item-span").html("Es scheint du bist nicht eingeloggt. Möglicherweise ist deine Sitzung abgelaufen. Du wirst in 5 Sekunden auf die <a href=\"/login.html\">Login-Seite umgeleitet.</a>");
+        $("#login-welcome").hide();
+        setTimeout(function() { window.location.replace("/login.html"); }, 5000);
+
     })
 }
 

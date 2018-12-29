@@ -149,11 +149,11 @@ func (db *Database) GetUserByID(ID int64) (*User, error) {
 	return u, nil
 }
 
-func (db *Database) AddItem(name, link string, createdBy int64) (int64, error) {
+func (db *Database) AddItem(name, link string, createdBy int64, reservedBy int64) (int64, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
-	res, err := db.itemInsertStmt.Exec(name, link, createdBy, nil)
+	res, err := db.itemInsertStmt.Exec(name, link, createdBy, reservedBy)
 	if err != nil {
 		return -1, err
 	}
