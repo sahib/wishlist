@@ -80,7 +80,7 @@ function updateList() {
             });
 
             var linkText = item.name
-            if(item.link != undefined && item.link == "") {
+            if(item.link != undefined && item.link != "") {
                 linkText = '<a href="'+item.link+'">'+item.name+'</a>'
             }
 
@@ -157,7 +157,7 @@ $(document).ready(function(){
         var link = $("#inputItemLink").val()
         if(name.length < 1) {
             $("#alert-add-item").show()
-            $("#alert-add-item-span").text("Bitte gib ein Geschenknamen ein.");
+            $("#alert-add-item-span").text("Bitte gib einen Geschenknamen ein.");
             return
         }
 

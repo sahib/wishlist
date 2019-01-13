@@ -82,8 +82,8 @@ func NewServer(cfg *config.Config, db *db.Database, cache *cache.SessionCache) (
 		srv: &http.Server{
 			Addr:              fmt.Sprintf(":%d", cfg.Int("server.port")),
 			Handler:           gziphandler.GzipHandler(router),
-			ReadHeaderTimeout: 10 * time.Second,
-			WriteTimeout:      10 * time.Second,
+			ReadHeaderTimeout: 60 * time.Second,
+			WriteTimeout:      60 * time.Second,
 			IdleTimeout:       360 * time.Second,
 			TLSConfig:         tlsConfig,
 		},
